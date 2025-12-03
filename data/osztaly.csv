@@ -1,0 +1,21 @@
+medsol_kod,osztaly_nev,nngyk_kod
+MS001,Belgyógyászati Osztály,001000536
+MS002,Sebészeti Osztály,001000537
+MS003,Traumatológiai Osztály,001000538
+MS004,Kardiológiai Osztály,001000539
+MS005,Neurológiai Osztály,001000540
+MS006,Ortopédiai Osztály,001000541
+MS007,Urológiai Osztály,001000542
+MS008,Gasztroenterológiai Osztály,001000543
+MS009,Pulmonológiai Osztály,001000544
+MS010,Onkológiai Osztály,001000545
+MS011,Reumatológiai Osztály,001000546
+MS012,Endokrinológiai Osztály,001000547
+MS013,Nefrologiai Osztály,001000548
+MS014,Hematológiai Osztály,001000549
+MS015,Fertőző Betegségek Osztálya,001000550
+MS016,Intenzív Osztály,001000551
+MS017,Sürgősségi Osztály,001000552
+MS018,Rehabilitációs Osztály,001000553
+MS019,Pszichiátriai Osztály,001000554
+MS020,Gyermekgyógyászati Osztály,001000555
