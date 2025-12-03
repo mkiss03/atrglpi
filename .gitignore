@@ -1,0 +1,60 @@
+# ÁTR Beragadt Betegek - Git Ignore
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# PHP
+vendor/
+composer.lock
+
+# Database Configuration (if sensitive)
+# Uncomment if you want to exclude database config
+# config/database.php
+
+# Logs
+*.log
+error_log
+access_log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Session files
+sessions/*
+!sessions/.gitkeep
+
+# Upload directory (if you add file uploads)
+uploads/*
+!uploads/.gitkeep
+
+# Cache
+cache/*
+!cache/.gitkeep
+
+# OS specific
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+desktop.ini
