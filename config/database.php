@@ -72,28 +72,44 @@ function getCurrentAdmin() {
 }
 
 /**
- * Get client IP address (handles proxies)
+ * Get client IP address (handles proxies and reverse proxies)
  * @return string
  */
 function getClientIp() {
-    $ip = '';
+    // List of headers to check (in order of priority)
+    $keys = [
+        'HTTP_CLIENT_IP',
+        'HTTP_X_FORWARDED_FOR',
+        'HTTP_X_FORWARDED',
+        'HTTP_X_CLUSTER_CLIENT_IP',
+        'HTTP_FORWARDED_FOR',
+        'HTTP_FORWARDED',
+        'REMOTE_ADDR',
+    ];
 
-    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        // Check for proxy
-        $ips = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
-        $ip = trim($ips[0]);
-    } elseif (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        $ip = $_SERVER['HTTP_CLIENT_IP'];
-    } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
-        $ip = $_SERVER['REMOTE_ADDR'];
+    foreach ($keys as $key) {
+        if (!empty($_SERVER[$key])) {
+            // Handle comma-separated IPs (common with X-Forwarded-For)
+            $ipList = explode(',', $_SERVER[$key]);
+
+            foreach ($ipList as $ip) {
+                $ip = trim($ip);
+
+                // Validate IP address (IPv4 or IPv6)
+                if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                    return $ip;
+                }
+
+                // If validation with NO_PRIV_RANGE fails, still accept private IPs
+                if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                    return $ip;
+                }
+            }
+        }
     }
 
-    // Validate IP
-    if (filter_var($ip, FILTER_VALIDATE_IP)) {
-        return $ip;
-    }
-
-    return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    // Fallback
+    return 'UNKNOWN';
 }
 
 /**

@@ -262,9 +262,11 @@ include __DIR__ . '/../includes/header.php';
                             <a href="list.php" class="btn btn-outline-primary btn-sm">
                                 <i class="bi bi-list-ul"></i> Rögzített rekordok
                             </a>
+                            <?php if (isAdmin()): ?>
                             <a href="export.php" class="btn btn-outline-success btn-sm">
                                 <i class="bi bi-file-earmark-excel"></i> Excel export
                             </a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
