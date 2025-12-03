@@ -6,6 +6,7 @@
 
 /**
  * Load osztaly data from CSV
+ * CSV structure: mskod;neak;nngyk;szakmakod;oszt_tipus;nev
  * @return array
  */
 function loadOsztalyData() {
@@ -19,15 +20,16 @@ function loadOsztalyData() {
 
     if (($handle = fopen($csvFile, 'r')) !== false) {
         // Read header row
-        $header = fgetcsv($handle, 1000, ',');
+        $header = fgetcsv($handle, 1000, ';');
 
         // Read data rows
-        while (($row = fgetcsv($handle, 1000, ',')) !== false) {
-            if (count($row) >= 3) {
+        while (($row = fgetcsv($handle, 1000, ';')) !== false) {
+            if (count($row) >= 6) {
+                // Row structure: mskod, neak, nngyk, szakmakod, oszt_tipus, nev
                 $osztalyData[] = [
-                    'medsol_kod' => $row[0],
-                    'osztaly_nev' => $row[1],
-                    'nngyk_kod' => $row[2],
+                    'medsol_kod' => trim($row[0]),           // mskod (pl. BE08)
+                    'osztaly_nev' => trim($row[5], ' "'),   // nev (remove quotes)
+                    'nngyk_kod' => trim($row[2]),           // nngyk (9 char code)
                 ];
             }
         }
