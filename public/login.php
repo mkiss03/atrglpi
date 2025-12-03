@@ -135,17 +135,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </a>
                                 </div>
                             </form>
-
-                            <hr class="my-4">
-
-                            <!-- Test credentials info -->
-                            <div class="alert alert-info mb-0">
-                                <small>
-                                    <strong><i class="bi bi-info-circle"></i> Teszt hozzáférés:</strong><br>
-                                    Felhasználó: <code>admin</code><br>
-                                    Jelszó: <code>password</code>
-                                </small>
-                            </div>
                         </div>
                     </div>
 

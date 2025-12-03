@@ -32,12 +32,6 @@
     <!-- Custom JS -->
     <script>
         $(document).ready(function() {
-            // Sidebar toggle
-            $('#sidebarToggle').on('click', function() {
-                $('.sidebar').toggleClass('collapsed');
-                $('.main-content').toggleClass('expanded');
-            });
-
             // Initialize Select2 for osztaly dropdown
             if ($('#osztaly').length) {
                 $('#osztaly').select2({
