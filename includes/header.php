@@ -64,12 +64,15 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                             <span>Lista / Áttekintés</span>
                         </a>
                     </li>
+
+                    <?php if ($isAdminUser): ?>
                     <li class="nav-item">
                         <a href="export.php" class="nav-link <?= $currentPage === 'export' ? 'active' : '' ?>">
                             <i class="bi bi-file-earmark-excel"></i>
                             <span>Exportok</span>
                         </a>
                     </li>
+                    <?php endif; ?>
 
                     <?php if ($isAdminUser): ?>
                     <li class="nav-item">
@@ -93,7 +96,7 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
                     <li class="nav-item">
                         <a href="login.php" class="nav-link <?= $currentPage === 'login' ? 'active' : '' ?>">
                             <i class="bi bi-box-arrow-in-right"></i>
-                            <span>Bejelentkezés</span>
+                            <span>Admin bejelentkezés</span>
                         </a>
                     </li>
                     <?php endif; ?>
@@ -106,10 +109,6 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
             <!-- Top Header Bar -->
             <header class="top-header">
                 <div class="header-left">
-                    <button class="btn btn-link sidebar-toggle" id="sidebarToggle">
-                        <i class="bi bi-list"></i>
-                    </button>
-
                     <!-- Breadcrumb will be inserted here by pages -->
                     <div id="breadcrumb-container"></div>
                 </div>

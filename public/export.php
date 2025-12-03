@@ -10,6 +10,12 @@ require_once __DIR__ . '/../models/AtrRecord.php';
 
 startSession();
 
+// Only admins can access export
+if (!isAdmin()) {
+    setFlashMessage('error', 'Nincs jogosultságod az export funkcióhoz. Kérlek jelentkezz be admin felhasználóként.');
+    redirect('login.php');
+}
+
 // Handle download action
 if (isset($_GET['action']) && $_GET['action'] === 'download') {
     $atrRecord = new AtrRecord();
