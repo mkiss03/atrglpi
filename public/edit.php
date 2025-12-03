@@ -121,7 +121,7 @@ include __DIR__ . '/../includes/header.php';
                         <!-- Osztály (Searchable Dropdown) -->
                         <div class="mb-3">
                             <label for="osztaly" class="form-label">
-                                Osztály (OSZTALY – NNK9 kód) <span class="text-danger">*</span>
+                                Osztály (OSZTALY – osztálykód) <span class="text-danger">*</span>
                             </label>
                             <select
                                 class="form-select"

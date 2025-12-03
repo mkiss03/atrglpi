@@ -165,4 +165,40 @@ class Admin {
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([':id' => $id]);
     }
+
+    /**
+     * Change admin password
+     * @param int $id Admin ID
+     * @param string $newPassword New password (will be hashed)
+     * @param string|null $currentPassword Current password (optional, for verification)
+     * @return bool
+     */
+    public function changePassword($id, $newPassword, $currentPassword = null) {
+        // If current password is provided, verify it first
+        if ($currentPassword !== null) {
+            $admin = $this->getById($id);
+            if (!$admin) {
+                return false;
+            }
+
+            // Get the actual password hash from database
+            $sql = "SELECT password_hash FROM admins WHERE id = :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute([':id' => $id]);
+            $result = $stmt->fetch();
+
+            if (!$result || !password_verify($currentPassword, $result['password_hash'])) {
+                return false; // Current password is incorrect
+            }
+        }
+
+        // Update password
+        $sql = "UPDATE admins SET password_hash = :password_hash WHERE id = :id";
+        $stmt = $this->pdo->prepare($sql);
+
+        return $stmt->execute([
+            ':id' => $id,
+            ':password_hash' => password_hash($newPassword, PASSWORD_DEFAULT),
+        ]);
+    }
 }
