@@ -16,10 +16,6 @@ composer.lock
 # Uncomment if you want to exclude database config
 # config/database.php
 
-# AD Configuration (IMPORTANT: Uncomment for production!)
-# Contains sensitive AD credentials and should NOT be committed to version control
-# config/ad.php
-
 # Logs
 *.log
 error_log

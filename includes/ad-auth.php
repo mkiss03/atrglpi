@@ -6,6 +6,7 @@
 
 /**
  * Authenticate user against Active Directory
+ * Simplified for legacy Windows Server 2008/2009 AD
  *
  * @param string $username Username (without domain suffix)
  * @param string $password User password
@@ -18,56 +19,46 @@ function authenticateAD($username, $password) {
         return false;
     }
 
-    // Load AD configuration
-    $config = require __DIR__ . '/../config/ad.php';
-
-    // Sanitize username (prevent LDAP injection)
-    $username = ldap_escape($username, '', LDAP_ESCAPE_FILTER);
+    // AD Configuration
+    $serviceUsername = "telefonkonyv";
+    $servicePassword = "Book1234!";
+    $accountSuffix = '@kmok.local';
+    $hostname = '10.1.0.16';
+    $baseDn = "dc=kmok,dc=local";
 
     // Connect to AD server
-    $ldapConn = ldap_connect($config['host'], $config['port']);
+    $ldapConn = ldap_connect($hostname);
 
     if (!$ldapConn) {
         error_log("AD Auth: Failed to connect to LDAP server");
         return false;
     }
 
-    // Set LDAP options
+    // Set LDAP options (for legacy AD 2008/2009)
     ldap_set_option($ldapConn, LDAP_OPT_PROTOCOL_VERSION, 3);
     ldap_set_option($ldapConn, LDAP_OPT_REFERRALS, 0);
+    ldap_set_option($ldapConn, LDAP_OPT_TIMELIMIT, 10);
     ldap_set_option($ldapConn, LDAP_OPT_NETWORK_TIMEOUT, 10);
-
-    // Start TLS if configured
-    if ($config['use_tls']) {
-        if (!@ldap_start_tls($ldapConn)) {
-            error_log("AD Auth: Failed to start TLS");
-            // Continue without TLS (not recommended for production)
-        }
-    }
 
     try {
         // First, bind with service account to search for user
-        $serviceBindDn = $config['service_user'] . $config['account_suffix'];
-        $serviceBind = @ldap_bind($ldapConn, $serviceBindDn, $config['service_pass']);
+        $serviceBind = @ldap_bind($ldapConn, $serviceUsername . $accountSuffix, $servicePassword);
 
         if (!$serviceBind) {
             error_log("AD Auth: Service account bind failed");
-            ldap_unbind($ldapConn);
+            ldap_close($ldapConn);
             return false;
         }
 
-        // Search for user
-        $searchFilter = str_replace('{username}', $username, $config['user_filter']);
-        $searchResult = @ldap_search(
-            $ldapConn,
-            $config['user_search_base'],
-            $searchFilter,
-            ['dn', 'sAMAccountName', 'displayName', 'mail', 'department', 'memberOf']
-        );
+        // Search for user by sAMAccountName
+        $searchFilter = "(samaccountname=" . ldap_escape($username, '', LDAP_ESCAPE_FILTER) . ")";
+        $attributes = ['displayName', 'mail', 'department', 'memberOf', 'samAccountName', 'cn'];
+
+        $searchResult = @ldap_search($ldapConn, $baseDn, $searchFilter, $attributes);
 
         if (!$searchResult) {
             error_log("AD Auth: User search failed for: $username");
-            ldap_unbind($ldapConn);
+            ldap_close($ldapConn);
             return false;
         }
 
@@ -75,19 +66,19 @@ function authenticateAD($username, $password) {
 
         if ($entries['count'] === 0) {
             error_log("AD Auth: User not found: $username");
-            ldap_unbind($ldapConn);
+            ldap_close($ldapConn);
             return false;
         }
 
         $userEntry = $entries[0];
         $userDn = $userEntry['dn'];
 
-        // Try to bind as the user (authenticate password)
+        // Now, try to bind as the user to validate password
         $userBind = @ldap_bind($ldapConn, $userDn, $password);
 
         if (!$userBind) {
             error_log("AD Auth: Password authentication failed for: $username");
-            ldap_unbind($ldapConn);
+            ldap_close($ldapConn);
             return false;
         }
 
@@ -97,18 +88,18 @@ function authenticateAD($username, $password) {
         $department = isset($userEntry['department'][0]) ? $userEntry['department'][0] : '';
         $memberOf = isset($userEntry['memberof']) ? $userEntry['memberof'] : [];
 
-        // Check if user is in admin group (Informatikai Osztály)
+        // Check if user is in "Informatikai Osztály" group
         $isAdmin = false;
         if (is_array($memberOf)) {
-            foreach ($memberOf as $group) {
-                if (stripos($group, 'Informatikai Osztály') !== false) {
+            for ($i = 0; $i < count($memberOf); $i++) {
+                if (stripos($memberOf[$i], 'Informatikai Osztály') !== false) {
                     $isAdmin = true;
                     break;
                 }
             }
         }
 
-        ldap_unbind($ldapConn);
+        ldap_close($ldapConn);
 
         return [
             'username' => $username,
@@ -122,7 +113,7 @@ function authenticateAD($username, $password) {
     } catch (Exception $e) {
         error_log("AD Auth: Exception: " . $e->getMessage());
         if ($ldapConn) {
-            @ldap_unbind($ldapConn);
+            @ldap_close($ldapConn);
         }
         return false;
     }
