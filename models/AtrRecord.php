@@ -19,12 +19,12 @@ class AtrRecord {
      * @return int Last inserted ID
      */
     public function create($data) {
+        // atr_nursing_cycle_id is removed from form - will be NULL by default in DB
         $sql = "INSERT INTO atr_records (
             intezmeny,
             osztaly,
             tavido,
             atr_dismissing_type,
-            atr_nursing_cycle_id,
             atr_nursing_cycle_data_id,
             created_ip,
             created_by_admin_id
@@ -33,7 +33,6 @@ class AtrRecord {
             :osztaly,
             :tavido,
             :atr_dismissing_type,
-            :atr_nursing_cycle_id,
             :atr_nursing_cycle_data_id,
             :created_ip,
             :created_by_admin_id
@@ -45,7 +44,6 @@ class AtrRecord {
             ':osztaly' => $data['osztaly'],
             ':tavido' => $data['tavido'],
             ':atr_dismissing_type' => $data['atr_dismissing_type'],
-            ':atr_nursing_cycle_id' => $data['atr_nursing_cycle_id'],
             ':atr_nursing_cycle_data_id' => $data['atr_nursing_cycle_data_id'],
             ':created_ip' => $data['created_ip'],
             ':created_by_admin_id' => $data['created_by_admin_id'] ?? null,

@@ -3,9 +3,9 @@
 
 USE atr_betegek;
 
--- Modify column to allow NULL values
+-- Modify column to allow NULL values with DEFAULT NULL
 ALTER TABLE atr_records
-MODIFY COLUMN atr_nursing_cycle_id VARCHAR(100) NULL COMMENT 'ÁTR ápolási ciklus azonosító (opcionális)';
+MODIFY COLUMN atr_nursing_cycle_id VARCHAR(100) NULL DEFAULT NULL COMMENT 'ÁTR ápolási ciklus azonosító (opcionális)';
 
 -- Verify the change
 DESCRIBE atr_records;

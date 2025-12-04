@@ -5,12 +5,9 @@
  */
 
 require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../models/Admin.php';
+require_once __DIR__ . '/../includes/auth.php';
 
-startSession();
-
-// Logout
-Admin::logout();
-
+// Clear session and redirect to login
+session_start();
 setFlashMessage('success', 'Sikeres kijelentkezés!');
-redirect('index.php');
+logoutUser('login.php');

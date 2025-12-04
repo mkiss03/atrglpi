@@ -6,9 +6,11 @@
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../models/AtrRecord.php';
 
-startSession();
+// Require AD authentication
+requireAdLogin();
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -27,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'osztaly' => $_POST['osztaly'],
                 'tavido' => $tavido,
                 'atr_dismissing_type' => $_POST['atr_dismissing_type'],
-                'atr_nursing_cycle_id' => isset($_POST['atr_nursing_cycle_id']) ? trim($_POST['atr_nursing_cycle_id']) : null,
+                // atr_nursing_cycle_id removed from form - will be NULL in DB
                 'atr_nursing_cycle_data_id' => trim($_POST['atr_nursing_cycle_data_id']),
                 'created_ip' => getClientIp(),
                 'created_by_admin_id' => getCurrentAdmin()['id'] ?? null,
