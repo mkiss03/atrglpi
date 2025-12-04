@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS atr_records (
     osztaly VARCHAR(20) NOT NULL COMMENT '9 character NNGYK/NNK9 code',
     tavido DATETIME NOT NULL COMMENT 'Távozási idő',
     atr_dismissing_type VARCHAR(50) NOT NULL COMMENT 'Elbocsátás módja',
-    atr_nursing_cycle_id VARCHAR(100) NOT NULL COMMENT 'ÁTR ápolási ciklus azonosító',
+    atr_nursing_cycle_id VARCHAR(100) NULL COMMENT 'ÁTR ápolási ciklus azonosító (opcionális)',
     atr_nursing_cycle_data_id VARCHAR(100) NOT NULL COMMENT 'ÁTR ápolási ciklus adat azonosító',
     created_ip VARCHAR(45) NOT NULL COMMENT 'IP address of creator (IPv4/IPv6)',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -12,6 +12,12 @@
  * @return array|false Returns user data array on success, false on failure
  */
 function authenticateAD($username, $password) {
+    // Check if LDAP extension is available
+    if (!function_exists('ldap_connect')) {
+        error_log("AD Auth: LDAP extension not installed - skipping AD authentication");
+        return false;
+    }
+
     // Load AD configuration
     $config = require __DIR__ . '/../config/ad.php';
 
