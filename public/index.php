@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'osztaly' => $_POST['osztaly'],
                 'tavido' => $tavido,
                 'atr_dismissing_type' => $_POST['atr_dismissing_type'],
-                'atr_nursing_cycle_id' => trim($_POST['atr_nursing_cycle_id']),
+                'atr_nursing_cycle_id' => isset($_POST['atr_nursing_cycle_id']) ? trim($_POST['atr_nursing_cycle_id']) : null,
                 'atr_nursing_cycle_data_id' => trim($_POST['atr_nursing_cycle_data_id']),
                 'created_ip' => getClientIp(),
                 'created_by_admin_id' => getCurrentAdmin()['id'] ?? null,
@@ -171,24 +171,6 @@ include __DIR__ . '/../includes/header.php';
                                     <option value="<?= e($key) ?>"><?= e($label) ?></option>
                                 <?php endforeach; ?>
                             </select>
-                        </div>
-
-                        <!-- ÁTR ápolási ciklus azonosító -->
-                        <div class="mb-3">
-                            <label for="atr_nursing_cycle_id" class="form-label">
-                                ÁTR ápolási ellátás azonosító (ATR_NURSING_CYCLE_ID) <span class="text-danger">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="atr_nursing_cycle_id"
-                                name="atr_nursing_cycle_id"
-                                placeholder="4KRYCDMJAS6VRPMH"
-                                required
-                            >
-                            <div class="form-text">
-                                Az azonosítót a HIS rendszer adja meg.
-                            </div>
                         </div>
 
                         <!-- ÁTR ápolási ciklus adat azonosító -->

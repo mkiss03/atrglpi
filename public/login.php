@@ -6,11 +6,12 @@
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../models/Admin.php';
+require_once __DIR__ . '/../includes/ad-auth.php';
 
 startSession();
 
 // If already logged in, redirect to index
-if (isAdmin()) {
+if (isAdmin() || isADAuthenticated()) {
     redirect('index.php');
 }
 
@@ -22,13 +23,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($username) || empty($password)) {
         setFlashMessage('error', 'Kérlek add meg a felhasználónevet és jelszót.');
     } else {
-        $admin = new Admin();
+        // Try AD authentication first
+        if (loginWithAD($username, $password)) {
+            $adUser = getCurrentADUser();
+            $displayName = $adUser['display_name'] ?? $username;
 
-        if ($admin->login($username, $password)) {
-            setFlashMessage('success', 'Sikeres bejelentkezés!');
+            setFlashMessage('success', "Sikeres bejelentkezés, $displayName!");
             redirect('index.php');
         } else {
-            setFlashMessage('error', 'Hibás felhasználónév vagy jelszó.');
+            // Fallback to database authentication (for app-only admins)
+            $admin = new Admin();
+
+            if ($admin->login($username, $password)) {
+                setFlashMessage('success', 'Sikeres bejelentkezés!');
+                redirect('index.php');
+            } else {
+                setFlashMessage('error', 'Hibás felhasználónév vagy jelszó. (AD vagy helyi adatbázis)');
+            }
         }
     }
 }

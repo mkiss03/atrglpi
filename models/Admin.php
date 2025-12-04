@@ -117,6 +117,20 @@ class Admin {
     }
 
     /**
+     * Get admin by username
+     * @param string $username
+     * @return array|null
+     */
+    public function getByUsername($username) {
+        $sql = "SELECT id, username, display_name, created_at FROM admins WHERE username = :username";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':username' => $username]);
+
+        $result = $stmt->fetch();
+        return $result ?: null;
+    }
+
+    /**
      * Update admin
      * @param int $id
      * @param array $data
