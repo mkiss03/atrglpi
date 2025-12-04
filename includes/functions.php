@@ -88,9 +88,7 @@ function validateAtrRecord($data) {
         $errors[] = 'Az elbocsátás módja mező kitöltése kötelező.';
     }
 
-    if (empty($data['atr_nursing_cycle_id'])) {
-        $errors[] = 'Az ÁTR ápolási ciklus azonosító mező kitöltése kötelező.';
-    }
+    // atr_nursing_cycle_id is optional (not shown in form)
 
     if (empty($data['atr_nursing_cycle_data_id'])) {
         $errors[] = 'Az ÁTR ápolási ciklus adat azonosító mező kitöltése kötelező.';

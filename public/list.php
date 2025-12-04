@@ -6,9 +6,11 @@
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../models/AtrRecord.php';
 
-startSession();
+// Require AD authentication
+requireAdLogin();
 
 $isAdminUser = isAdmin();
 
@@ -58,11 +60,13 @@ include __DIR__ . '/../includes/header.php';
                         <h1 class="page-title">Rögzített rekordok</h1>
                         <p class="page-subtitle">Összesen <?= $totalCount ?> rekord</p>
                     </div>
+                    <?php if ($isAdminUser): ?>
                     <div>
                         <a href="export.php" class="btn btn-success">
                             <i class="bi bi-file-earmark-excel"></i> Excel export
                         </a>
                     </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>

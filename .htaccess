@@ -1,0 +1,17 @@
+# ÁTR Beragadt Betegek - Root .htaccess
+# Automatically redirect all requests to /public directory
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # If the request is not already for /public
+    RewriteCond %{REQUEST_URI} !^/public/
+
+    # Redirect to /public
+    RewriteRule ^(.*)$ public/$1 [L,QSA]
+</IfModule>
+
+# If mod_rewrite is not available, use FallbackResource
+<IfModule !mod_rewrite.c>
+    FallbackResource /public/index.php
+</IfModule>

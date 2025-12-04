@@ -6,9 +6,11 @@
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../models/Admin.php';
 
-startSession();
+// Require AD authentication
+requireAdLogin();
 
 // Only admins can access
 if (!isAdmin()) {
@@ -110,15 +112,22 @@ include __DIR__ . '/../includes/header.php';
                                     <td><?= e($adminUser['display_name']) ?></td>
                                     <td><?= formatDateTime($adminUser['created_at']) ?></td>
                                     <td>
-                                        <?php if (getCurrentAdmin()['id'] !== $adminUser['id']): ?>
-                                        <a href="admin.php?action=delete&id=<?= $adminUser['id'] ?>"
-                                           class="btn btn-sm btn-danger btn-delete"
-                                           title="Törlés">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
-                                        <?php else: ?>
-                                        <span class="badge bg-primary">Te vagy</span>
-                                        <?php endif; ?>
+                                        <div class="d-flex gap-1">
+                                            <a href="change-password.php?id=<?= $adminUser['id'] ?>"
+                                               class="btn btn-sm btn-warning"
+                                               title="Jelszó módosítása">
+                                                <i class="bi bi-key"></i>
+                                            </a>
+                                            <?php if (getCurrentAdmin()['id'] !== $adminUser['id']): ?>
+                                            <a href="admin.php?action=delete&id=<?= $adminUser['id'] ?>"
+                                               class="btn btn-sm btn-danger btn-delete"
+                                               title="Törlés">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            <?php else: ?>
+                                            <span class="badge bg-primary">Te vagy</span>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>

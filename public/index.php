@@ -6,9 +6,11 @@
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../models/AtrRecord.php';
 
-startSession();
+// Require AD authentication
+requireAdLogin();
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -27,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'osztaly' => $_POST['osztaly'],
                 'tavido' => $tavido,
                 'atr_dismissing_type' => $_POST['atr_dismissing_type'],
-                'atr_nursing_cycle_id' => trim($_POST['atr_nursing_cycle_id']),
+                // atr_nursing_cycle_id removed from form - will be NULL in DB
                 'atr_nursing_cycle_data_id' => trim($_POST['atr_nursing_cycle_data_id']),
                 'created_ip' => getClientIp(),
                 'created_by_admin_id' => getCurrentAdmin()['id'] ?? null,
@@ -95,7 +97,7 @@ include __DIR__ . '/../includes/header.php';
                                 type="text"
                                 class="form-control"
                                 id="intezmeny"
-                                value="NNK6_12345678"
+                                value="140100"
                                 readonly
                                 disabled
                             >
@@ -107,7 +109,7 @@ include __DIR__ . '/../includes/header.php';
                         <!-- Osztály (Searchable Dropdown) -->
                         <div class="mb-3">
                             <label for="osztaly" class="form-label">
-                                Osztály (OSZTALY – NNK9 kód) <span class="text-danger">*</span>
+                                Osztály (OSZTALY – osztálykód) <span class="text-danger">*</span>
                             </label>
                             <select
                                 class="form-select"
@@ -171,24 +173,6 @@ include __DIR__ . '/../includes/header.php';
                                     <option value="<?= e($key) ?>"><?= e($label) ?></option>
                                 <?php endforeach; ?>
                             </select>
-                        </div>
-
-                        <!-- ÁTR ápolási ciklus azonosító -->
-                        <div class="mb-3">
-                            <label for="atr_nursing_cycle_id" class="form-label">
-                                ÁTR ápolási ellátás azonosító (ATR_NURSING_CYCLE_ID) <span class="text-danger">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="atr_nursing_cycle_id"
-                                name="atr_nursing_cycle_id"
-                                placeholder="4KRYCDMJAS6VRPMH"
-                                required
-                            >
-                            <div class="form-text">
-                                Az azonosítót a HIS rendszer adja meg.
-                            </div>
                         </div>
 
                         <!-- ÁTR ápolási ciklus adat azonosító -->
@@ -262,9 +246,11 @@ include __DIR__ . '/../includes/header.php';
                             <a href="list.php" class="btn btn-outline-primary btn-sm">
                                 <i class="bi bi-list-ul"></i> Rögzített rekordok
                             </a>
+                            <?php if (isAdmin()): ?>
                             <a href="export.php" class="btn btn-outline-success btn-sm">
                                 <i class="bi bi-file-earmark-excel"></i> Excel export
                             </a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
