@@ -62,7 +62,7 @@ function authenticateAD($username, $password) {
             $ldapConn,
             $config['user_search_base'],
             $searchFilter,
-            ['dn', 'sAMAccountName', 'displayName', 'mail', 'memberOf']
+            ['dn', 'sAMAccountName', 'displayName', 'mail', 'department', 'memberOf']
         );
 
         if (!$searchResult) {
@@ -94,6 +94,7 @@ function authenticateAD($username, $password) {
         // Authentication successful - gather user data
         $displayName = isset($userEntry['displayname'][0]) ? $userEntry['displayname'][0] : $username;
         $email = isset($userEntry['mail'][0]) ? $userEntry['mail'][0] : '';
+        $department = isset($userEntry['department'][0]) ? $userEntry['department'][0] : '';
         $memberOf = isset($userEntry['memberof']) ? $userEntry['memberof'] : [];
 
         // Check if user is in admin group (Informatikai Osztály)
@@ -113,6 +114,7 @@ function authenticateAD($username, $password) {
             'username' => $username,
             'display_name' => $displayName,
             'email' => $email,
+            'department' => $department,
             'is_admin' => $isAdmin,
             'dn' => $userDn,
         ];

@@ -6,10 +6,12 @@
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/auth.php';
 
 startSession();
 $currentAdmin = getCurrentAdmin();
 $isAdminUser = isAdmin();
+$currentAuthUser = getCurrentAuthUser(); // Get AD user info
 
 // Get current page
 $currentPage = basename($_SERVER['PHP_SELF'], '.php');
@@ -85,21 +87,23 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
 
                     <li class="nav-divider"></li>
 
-                    <?php if ($isAdminUser): ?>
+                    <?php if (!$isAdminUser && $currentAuthUser && strcasecmp($currentAuthUser['department'] ?? '', 'Informatikai osztály') === 0): ?>
+                    <!-- Show Admin Login only for Informatikai osztály users who are not yet admin -->
+                    <li class="nav-item">
+                        <a href="admin_login.php" class="nav-link <?= $currentPage === 'admin_login' ? 'active' : '' ?>">
+                            <i class="bi bi-shield-lock"></i>
+                            <span>Admin bejelentkezés</span>
+                        </a>
+                    </li>
+                    <?php endif; ?>
+
+                    <!-- Logout is always visible for authenticated users -->
                     <li class="nav-item">
                         <a href="logout.php" class="nav-link">
                             <i class="bi bi-box-arrow-right"></i>
                             <span>Kijelentkezés</span>
                         </a>
                     </li>
-                    <?php else: ?>
-                    <li class="nav-item">
-                        <a href="login.php" class="nav-link <?= $currentPage === 'login' ? 'active' : '' ?>">
-                            <i class="bi bi-box-arrow-in-right"></i>
-                            <span>Admin bejelentkezés</span>
-                        </a>
-                    </li>
-                    <?php endif; ?>
                 </ul>
             </nav>
         </aside>
@@ -115,17 +119,23 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
 
                 <div class="header-right">
                     <?php if ($isAdminUser): ?>
+                        <!-- Admin user (both AD and Admin authenticated) -->
                         <span class="badge bg-success me-2">
                             <i class="bi bi-shield-check"></i> Admin
                         </span>
                         <div class="user-info">
                             <i class="bi bi-person-circle"></i>
-                            <span class="user-name"><?= e($currentAdmin['display_name']) ?></span>
+                            <span class="user-name"><?= e($currentAuthUser['display_name'] ?? $currentAdmin['display_name']) ?></span>
                         </div>
-                    <?php else: ?>
+                    <?php elseif ($currentAuthUser): ?>
+                        <!-- AD user (normal access) -->
                         <span class="badge bg-secondary me-2">
                             <i class="bi bi-person"></i> Normál
                         </span>
+                        <div class="user-info">
+                            <i class="bi bi-person-circle"></i>
+                            <span class="user-name"><?= e($currentAuthUser['display_name']) ?></span>
+                        </div>
                     <?php endif; ?>
                 </div>
             </header>

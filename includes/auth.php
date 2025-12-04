@@ -10,41 +10,55 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 /**
- * Require AD Login - Redirect to login if not authenticated
+ * Require AD Login - Redirect to AD login if not authenticated
  *
- * This function checks if the user is authenticated via Active Directory.
- * If not authenticated, redirects to the AD login page.
+ * FIRST TIER: This is the base authentication level.
+ * All users MUST authenticate via Active Directory before accessing ANY page.
  *
  * Usage: Call this at the top of any protected page
  *
- * @param string $loginPage Path to login page (default: login.php)
+ * @param string $loginPage Path to AD login page (default: login_ad.php)
  * @return void
  */
-function requireAdLogin($loginPage = 'login.php') {
-    // Check if user is authenticated via AD or database admin
-    $isAuthenticated = false;
-
-    // Check AD authentication
-    if (isset($_SESSION['ad_authenticated']) && $_SESSION['ad_authenticated'] === true) {
-        $isAuthenticated = true;
-    }
-
-    // Check database admin authentication (fallback)
-    if (isset($_SESSION['admin_id']) && $_SESSION['admin_id'] > 0) {
-        $isAuthenticated = true;
-    }
-
-    // If not authenticated, redirect to login page
-    if (!$isAuthenticated) {
+function requireAdLogin($loginPage = 'login_ad.php') {
+    // Check if user is authenticated via AD (check $_SESSION['ad_user'])
+    if (empty($_SESSION['ad_user'])) {
         // Store the requested page for redirect after login
         $_SESSION['redirect_after_login'] = $_SERVER['REQUEST_URI'] ?? '/';
 
-        // Redirect to login page
+        // Redirect to AD login page
         $currentDir = dirname($_SERVER['SCRIPT_NAME']);
         $loginUrl = rtrim($currentDir, '/') . '/' . ltrim($loginPage, '/');
 
         header("Location: $loginUrl");
         exit;
+    }
+}
+
+/**
+ * Require Admin Access (Second Tier Authentication)
+ *
+ * SECOND TIER: Only "Informatikai osztály" department can access admin login.
+ * This function checks if the current AD user is allowed to access admin features.
+ *
+ * Usage: Call this on admin_login.php and admin-specific pages
+ *
+ * @return void Dies with 403 if user doesn't have access
+ */
+function requireAdminAccess() {
+    // Must have AD session first
+    if (empty($_SESSION['ad_user'])) {
+        http_response_code(403);
+        die('Nincs jogosultság. Kérlek jelentkezz be AD azonosítóval először.');
+    }
+
+    $adUser = $_SESSION['ad_user'];
+    $department = $adUser['department'] ?? '';
+
+    // Check if user is in "Informatikai osztály" department
+    if (strcasecmp($department, 'Informatikai osztály') !== 0) {
+        http_response_code(403);
+        die('Nincs jogosultság az admin bejelentkezéshez. Csak az Informatikai osztály tagjai férhetnek hozzá.');
     }
 }
 
@@ -55,24 +69,26 @@ function requireAdLogin($loginPage = 'login.php') {
  * @return array|null User data array or null if not authenticated
  */
 function getCurrentAuthUser() {
-    // Prefer AD user data
-    if (isset($_SESSION['ad_authenticated']) && $_SESSION['ad_authenticated'] === true) {
+    // Prefer AD user data from $_SESSION['ad_user']
+    if (!empty($_SESSION['ad_user'])) {
         return [
             'type' => 'ad',
-            'username' => $_SESSION['ad_username'] ?? 'Unknown',
-            'display_name' => $_SESSION['ad_display_name'] ?? 'Unknown User',
-            'email' => $_SESSION['ad_email'] ?? '',
-            'is_admin' => $_SESSION['ad_is_admin'] ?? false,
+            'username' => $_SESSION['ad_user']['samaccountname'] ?? 'Unknown',
+            'display_name' => $_SESSION['ad_user']['displayname'] ?? 'Unknown User',
+            'email' => $_SESSION['ad_user']['mail'] ?? '',
+            'department' => $_SESSION['ad_user']['department'] ?? '',
+            'is_admin' => isset($_SESSION['admin_id']) && $_SESSION['admin_id'] > 0,
         ];
     }
 
-    // Fallback to database admin
+    // Fallback to database admin (legacy compatibility)
     if (isset($_SESSION['admin_id']) && $_SESSION['admin_id'] > 0) {
         return [
             'type' => 'database',
             'username' => $_SESSION['admin_username'] ?? 'Unknown',
             'display_name' => $_SESSION['admin_display_name'] ?? 'Unknown User',
             'email' => '',
+            'department' => '',
             'is_admin' => true,
         ];
     }
