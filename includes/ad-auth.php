@@ -42,10 +42,11 @@ function authenticateAD($username, $password) {
 
     try {
         // First, bind with service account to search for user
-        $serviceBind = @ldap_bind($ldapConn, $serviceUsername . $accountSuffix, $servicePassword);
+        $serviceBind = ldap_bind($ldapConn, $serviceUsername . $accountSuffix, $servicePassword);
 
         if (!$serviceBind) {
-            error_log("AD Auth: Service account bind failed");
+            $error = ldap_error($ldapConn);
+            error_log("AD Auth: Service account bind failed - LDAP Error: $error");
             ldap_close($ldapConn);
             return false;
         }
@@ -54,10 +55,11 @@ function authenticateAD($username, $password) {
         $searchFilter = "(samaccountname=" . ldap_escape($username, '', LDAP_ESCAPE_FILTER) . ")";
         $attributes = ['displayName', 'mail', 'department', 'memberOf', 'samAccountName', 'cn'];
 
-        $searchResult = @ldap_search($ldapConn, $baseDn, $searchFilter, $attributes);
+        $searchResult = ldap_search($ldapConn, $baseDn, $searchFilter, $attributes);
 
         if (!$searchResult) {
-            error_log("AD Auth: User search failed for: $username");
+            $error = ldap_error($ldapConn);
+            error_log("AD Auth: User search failed for: $username - LDAP Error: $error");
             ldap_close($ldapConn);
             return false;
         }
@@ -65,24 +67,27 @@ function authenticateAD($username, $password) {
         $entries = ldap_get_entries($ldapConn, $searchResult);
 
         if ($entries['count'] === 0) {
-            error_log("AD Auth: User not found: $username");
+            error_log("AD Auth: User not found: $username (Search returned 0 results)");
             ldap_close($ldapConn);
             return false;
         }
 
         $userEntry = $entries[0];
         $userDn = $userEntry['dn'];
+        error_log("AD Auth: Found user DN: $userDn");
 
         // Now, try to bind as the user to validate password
-        $userBind = @ldap_bind($ldapConn, $userDn, $password);
+        $userBind = ldap_bind($ldapConn, $userDn, $password);
 
         if (!$userBind) {
-            error_log("AD Auth: Password authentication failed for: $username");
+            $error = ldap_error($ldapConn);
+            error_log("AD Auth: Password authentication failed for: $username - LDAP Error: $error");
             ldap_close($ldapConn);
             return false;
         }
 
         // Authentication successful - gather user data
+        error_log("AD Auth: Authentication successful for: $username");
         $displayName = isset($userEntry['displayname'][0]) ? $userEntry['displayname'][0] : $username;
         $email = isset($userEntry['mail'][0]) ? $userEntry['mail'][0] : '';
         $department = isset($userEntry['department'][0]) ? $userEntry['department'][0] : '';
