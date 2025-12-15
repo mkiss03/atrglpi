@@ -4,13 +4,22 @@
  * ÁTR Beragadt Betegek - View All Records
  */
 
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/auth.php';
-require_once __DIR__ . '/../models/AtrRecord.php';
+// Enable error reporting for debugging
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-// Require AD authentication
-requireAdLogin();
+try {
+    require_once __DIR__ . '/../config/database.php';
+    require_once __DIR__ . '/../includes/functions.php';
+    require_once __DIR__ . '/../includes/auth.php';
+    require_once __DIR__ . '/../models/AtrRecord.php';
+
+    // Require AD authentication
+    requireAdLogin();
+} catch (Exception $e) {
+    die("Error during initialization: " . $e->getMessage() . "<br>File: " . $e->getFile() . "<br>Line: " . $e->getLine());
+}
 
 $isAdminUser = isAdmin();
 
@@ -33,17 +42,21 @@ $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $perPage = 20;
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-// Get records
-$atrRecord = new AtrRecord();
-$records = $atrRecord->getAll($page, $perPage, $search);
-$totalCount = $atrRecord->getTotalCount($search);
-$totalPages = ceil($totalCount / $perPage);
+try {
+    // Get records
+    $atrRecord = new AtrRecord();
+    $records = $atrRecord->getAll($page, $perPage, $search);
+    $totalCount = $atrRecord->getTotalCount($search);
+    $totalPages = ceil($totalCount / $perPage);
 
-// Get dismissing types for display
-$dismissingTypes = AtrRecord::getDismissingTypes();
+    // Get dismissing types for display
+    $dismissingTypes = AtrRecord::getDismissingTypes();
 
-// Load osztaly data for search dropdown
-$osztalyData = loadOsztalyData();
+    // Load osztaly data for search dropdown
+    $osztalyData = loadOsztalyData();
+} catch (Exception $e) {
+    die("Error loading data: " . $e->getMessage() . "<br>File: " . $e->getFile() . "<br>Line: " . $e->getLine() . "<br>Search: " . htmlspecialchars($search));
+}
 
 include __DIR__ . '/../includes/header.php';
 ?>
