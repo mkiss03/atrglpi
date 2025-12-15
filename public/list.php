@@ -9,15 +9,32 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Log file for debugging
+$logFile = __DIR__ . '/../logs/debug.log';
+@mkdir(dirname($logFile), 0755, true);
+
+function debugLog($message) {
+    global $logFile;
+    file_put_contents($logFile, date('[Y-m-d H:i:s] ') . $message . "\n", FILE_APPEND);
+}
+
+debugLog("=== LIST.PHP START ===");
+debugLog("GET params: " . print_r($_GET, true));
+
 try {
+    debugLog("Loading dependencies...");
     require_once __DIR__ . '/../config/database.php';
     require_once __DIR__ . '/../includes/functions.php';
     require_once __DIR__ . '/../includes/auth.php';
     require_once __DIR__ . '/../models/AtrRecord.php';
+    debugLog("Dependencies loaded successfully");
 
     // Require AD authentication
+    debugLog("Checking authentication...");
     requireAdLogin();
+    debugLog("Authentication OK");
 } catch (Exception $e) {
+    debugLog("EXCEPTION: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
     die("Error during initialization: " . $e->getMessage() . "<br>File: " . $e->getFile() . "<br>Line: " . $e->getLine());
 }
 
@@ -38,25 +55,42 @@ if ($isAdminUser && isset($_GET['action']) && $_GET['action'] === 'delete' && is
 }
 
 // Pagination
+debugLog("Setting pagination parameters...");
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $perPage = 20;
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+debugLog("Page: $page, PerPage: $perPage, Search: '$search'");
 
 try {
     // Get records
+    debugLog("Creating AtrRecord instance...");
     $atrRecord = new AtrRecord();
+
+    debugLog("Fetching records...");
     $records = $atrRecord->getAll($page, $perPage, $search);
+    debugLog("Records fetched: " . count($records));
+
+    debugLog("Getting total count...");
     $totalCount = $atrRecord->getTotalCount($search);
+    debugLog("Total count: $totalCount");
+
     $totalPages = ceil($totalCount / $perPage);
 
     // Get dismissing types for display
+    debugLog("Getting dismissing types...");
     $dismissingTypes = AtrRecord::getDismissingTypes();
 
     // Load osztaly data for search dropdown
+    debugLog("Loading osztaly data...");
     $osztalyData = loadOsztalyData();
+    debugLog("Osztaly data loaded: " . count($osztalyData) . " items");
 } catch (Exception $e) {
+    debugLog("EXCEPTION in data loading: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
     die("Error loading data: " . $e->getMessage() . "<br>File: " . $e->getFile() . "<br>Line: " . $e->getLine() . "<br>Search: " . htmlspecialchars($search));
 }
+
+debugLog("Including header...");
+debugLog("=== LIST.PHP DATA LOADED SUCCESSFULLY ===");
 
 include __DIR__ . '/../includes/header.php';
 ?>
