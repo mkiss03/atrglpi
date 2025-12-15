@@ -69,15 +69,12 @@ class AtrRecord {
         LEFT JOIN admins a ON r.created_by_admin_id = a.id
         WHERE 1=1";
 
-        $params = [];
-
         if (!empty($search)) {
             $sql .= " AND (
                 r.osztaly LIKE :search
                 OR r.atr_nursing_cycle_id LIKE :search
                 OR r.atr_nursing_cycle_data_id LIKE :search
             )";
-            $params[':search'] = '%' . $search . '%';
         }
 
         $sql .= " ORDER BY r.created_at DESC LIMIT :limit OFFSET :offset";
@@ -85,8 +82,8 @@ class AtrRecord {
         $stmt = $this->pdo->prepare($sql);
 
         // Bind search parameter if exists
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
+        if (!empty($search)) {
+            $stmt->bindValue(':search', '%' . $search . '%', PDO::PARAM_STR);
         }
 
         $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
