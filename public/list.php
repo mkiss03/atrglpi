@@ -42,6 +42,9 @@ $totalPages = ceil($totalCount / $perPage);
 // Get dismissing types for display
 $dismissingTypes = AtrRecord::getDismissingTypes();
 
+// Load osztaly data for search dropdown
+$osztalyData = loadOsztalyData();
+
 include __DIR__ . '/../includes/header.php';
 ?>
 
@@ -76,13 +79,22 @@ include __DIR__ . '/../includes/header.php';
     <div class="row mb-3">
         <div class="col-lg-6">
             <form method="GET" action="list.php" class="d-flex gap-2">
-                <input
-                    type="text"
+                <select
+                    class="form-select"
+                    id="search"
                     name="search"
-                    class="form-control"
-                    placeholder="Keresés osztály, azonosítók alapján..."
-                    value="<?= e($search) ?>"
                 >
+                    <option value="">Kezdj el gépelni osztálykódra vagy névre...</option>
+                    <?php foreach ($osztalyData as $osztaly): ?>
+                        <option value="<?= e($osztaly['nngyk_kod']) ?>"
+                                <?= $search === $osztaly['nngyk_kod'] ? 'selected' : '' ?>
+                                data-medsol="<?= e($osztaly['medsol_kod']) ?>">
+                            <?= e($osztaly['medsol_kod']) ?> –
+                            <?= e($osztaly['osztaly_nev']) ?>
+                            (NNGYK: <?= e($osztaly['nngyk_kod']) ?>)
+                        </option>
+                    <?php endforeach; ?>
+                </select>
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-search"></i> Keresés
                 </button>
