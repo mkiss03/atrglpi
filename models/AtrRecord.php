@@ -71,9 +71,9 @@ class AtrRecord {
 
         if (!empty($search)) {
             $sql .= " AND (
-                r.osztaly LIKE :search
-                OR r.atr_nursing_cycle_id LIKE :search
-                OR r.atr_nursing_cycle_data_id LIKE :search
+                r.osztaly LIKE :search1
+                OR r.atr_nursing_cycle_id LIKE :search2
+                OR r.atr_nursing_cycle_data_id LIKE :search3
             )";
         }
 
@@ -81,9 +81,12 @@ class AtrRecord {
 
         $stmt = $this->pdo->prepare($sql);
 
-        // Bind search parameter if exists
+        // Bind search parameters if exists
         if (!empty($search)) {
-            $stmt->bindValue(':search', '%' . $search . '%', PDO::PARAM_STR);
+            $searchParam = '%' . $search . '%';
+            $stmt->bindValue(':search1', $searchParam, PDO::PARAM_STR);
+            $stmt->bindValue(':search2', $searchParam, PDO::PARAM_STR);
+            $stmt->bindValue(':search3', $searchParam, PDO::PARAM_STR);
         }
 
         $stmt->bindValue(':limit', (int)$perPage, PDO::PARAM_INT);
@@ -100,19 +103,25 @@ class AtrRecord {
      */
     public function getTotalCount($search = '') {
         $sql = "SELECT COUNT(*) as count FROM atr_records WHERE 1=1";
-        $params = [];
 
         if (!empty($search)) {
             $sql .= " AND (
-                osztaly LIKE :search
-                OR atr_nursing_cycle_id LIKE :search
-                OR atr_nursing_cycle_data_id LIKE :search
+                osztaly LIKE :search1
+                OR atr_nursing_cycle_id LIKE :search2
+                OR atr_nursing_cycle_data_id LIKE :search3
             )";
-            $params[':search'] = '%' . $search . '%';
         }
 
         $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
+
+        if (!empty($search)) {
+            $searchParam = '%' . $search . '%';
+            $stmt->bindValue(':search1', $searchParam, PDO::PARAM_STR);
+            $stmt->bindValue(':search2', $searchParam, PDO::PARAM_STR);
+            $stmt->bindValue(':search3', $searchParam, PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
 
         return $stmt->fetch()['count'];
     }
