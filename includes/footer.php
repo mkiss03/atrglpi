@@ -32,9 +32,27 @@
     <!-- Custom JS -->
     <script>
         $(document).ready(function() {
-            // Initialize Select2 for osztaly dropdown
+            // Initialize Select2 for osztaly dropdown (rögzítés oldal)
             if ($('#osztaly').length) {
                 $('#osztaly').select2({
+                    theme: 'bootstrap-5',
+                    placeholder: 'Kezdj el gépelni osztálykódra vagy névre...',
+                    allowClear: true,
+                    width: '100%',
+                    language: {
+                        noResults: function() {
+                            return 'Nincs találat';
+                        },
+                        searching: function() {
+                            return 'Keresés...';
+                        }
+                    }
+                });
+            }
+
+            // Initialize Select2 for search dropdown (lista oldal)
+            if ($('#search').length) {
+                $('#search').select2({
                     theme: 'bootstrap-5',
                     placeholder: 'Kezdj el gépelni osztálykódra vagy névre...',
                     allowClear: true,
